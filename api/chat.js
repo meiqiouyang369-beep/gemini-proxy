@@ -1,3 +1,4 @@
+// 版本号: V2.0 (强制刷新版)
 export const config = {
   runtime: 'edge',
 };
@@ -11,13 +12,19 @@ export default async function handler(req) {
 
     if (!API_KEY) return new Response('Error: Missing API Key', { status: 500 });
 
-    // 修改点：这里把 pro 改成了 flash，速度提升5倍
+    // 核心修改：使用 Flash 模型 + 强制限制 800 字
     const googleRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+             maxOutputTokens: 800,  // 强制限制输出长度，保证 5 秒内说完
+             temperature: 0.7
+          }
+        })
       }
     );
 
