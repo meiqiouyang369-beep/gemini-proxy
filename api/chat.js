@@ -11,8 +11,9 @@ export default async function handler(req) {
 
     if (!API_KEY) return new Response('Error: Missing API Key', { status: 500 });
 
+    // 修改点：这里把 pro 改成了 flash，速度提升5倍
     const googleRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,7 +24,6 @@ export default async function handler(req) {
     const googleData = await googleRes.json();
     const aiText = googleData?.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No content";
 
-    // 修改点：直接返回纯文本，不再包裹 JSON
     return new Response(aiText, {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
