@@ -15,15 +15,14 @@ app.post("/api/chat", async (req, res) => {
     if (!API_KEY) return res.json({ result: "Error: Missing API Key in Zeabur" });
     if (!prompt) return res.json({ result: "Error: Prompt is empty" });
 
-    // 核心修改：将模型改为最稳定的 'gemini-pro'
+    // 使用最标准、最不容易出错的模型名称: gemini-1.5-flash
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          // 保持关闭安全审查，防止误判
           safetySettings: [
             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -35,14 +34,13 @@ app.post("/api/chat", async (req, res) => {
     );
 
     const data = await response.json();
-
     const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (aiText) {
       res.json({ result: aiText });
     } else {
       console.error("Gemini Error:", JSON.stringify(data));
-      // 如果出错，返回详细信息
+      // 如果出错，把错误信息完整返回，方便排查
       res.json({ result: "Gemini Error: " + (data.error?.message || JSON.stringify(data)) });
     }
 
