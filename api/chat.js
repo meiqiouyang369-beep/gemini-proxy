@@ -23,11 +23,12 @@ export default async function handler(req) {
     const googleData = await googleRes.json();
     const aiText = googleData?.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No content";
 
-    return new Response(JSON.stringify({ result: aiText }), {
-      headers: { 'Content-Type': 'application/json' }
+    // 修改点：直接返回纯文本，不再包裹 JSON
+    return new Response(aiText, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
 
   } catch (e) {
-    return new Response(JSON.stringify({ result: "Server Error: " + e.message }), { status: 500 });
+    return new Response("Server Error: " + e.message, { status: 500 });
   }
 }
