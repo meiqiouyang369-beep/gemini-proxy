@@ -5,31 +5,29 @@ const port = process.env.PORT || 8080;
 
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("Gemini Flash Service is Ready! 🚀"));
+app.get("/", (req, res) => res.send("Gemini Amazon Service Ready! 🚀"));
 
 app.post("/api/chat", async (req, res) => {
   try {
     const { prompt } = req.body;
     const API_KEY = process.env.GEMINI_API_KEY;
 
-    if (!API_KEY) return res.json({ result: "Error: Missing API Key" });
+    if (!API_KEY) return res.send("Error: Missing API Key");
 
     const genAI = new GoogleGenerativeAI(API_KEY);
-
-    // ✅ 改用这个模型，它是 Google 官方提供的“免费版”安全别名
-    // 它在您的列表里明确存在 (gemini-flash-latest)
+    // 使用免费版别名，确保稳定
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    res.json({ result: text });
+    // ✅ 关键：直接发送纯文本，这样飞书里就不会有 {"result":...} 这种乱码了
+    res.send(text);
 
   } catch (error) {
     console.error("Chat Error:", error);
-    // 如果碰巧这个也忙，我们把错误返回给飞书看
-    res.json({ result: "Error: " + error.message });
+    res.send("Error: " + error.message);
   }
 });
 
